@@ -1,6 +1,8 @@
 package hello
 
 import com.intellij.openapi.util.Disposer
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiRecursiveElementWalkingVisitor
 import com.intellij.psi.search.GlobalSearchScope
 import org.jetbrains.kotlin.analyzer.ModuleContent
 import org.jetbrains.kotlin.analyzer.ModuleInfo
@@ -131,13 +133,24 @@ class KotlinScriptParser {
 
 
 fun main(args: Array<String>) {
-    val scriptFile = "/media/data/java/blackfern/kotlin-compile-test/test.kt"
+    val scriptFile = if (args.isEmpty()) "src/main/java/hello/CompileTest.kt" else args[0]
 
     val parser = KotlinScriptParser()
 
     val analyzeContext = parser.parse(scriptFile)
+    analyzeContext.files.forEach{
+        var offset = 0
+        it.acceptChildren(object : PsiRecursiveElementWalkingVisitor(){
+            override fun visitElement(element: PsiElement?) {
+                offset += 2
+                for(t in 0..offset) print(" ")
+                println("$element {")
+                element?.acceptChildren(this)
+                for(t in 0..offset) print(" ")
+                println("}")
+                offset -= 2
+            }
 
-    val function = analyzeContext.functions.keys.first()
-    val body = function.bodyExpression as KtBlockExpression
-    val i = 0;
+        })
+    }
 }
