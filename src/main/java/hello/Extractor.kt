@@ -4,20 +4,33 @@ import java.io.BufferedReader
 import java.io.File
 
 fun main(args: Array<String>) {
+    startExtract()
+}
+
+object Id {
+    fun id(): Int {
+        value++
+        return value
+    }
+    var value = 0
+}
+
+fun startExtract() {
 
     val folder = "files"
 
     walkInFolder(folder)
-
 }
 
 fun walkInFolder(folder: String) {
 
     for ( file in File(folder).listFiles()) {
-        if (file.isFile)
-            extractFeatures(file.path)
+        val path = file.path
+        if (file.isFile && path.endsWith(".kt")) {
+            extractFeatures(path)
+        }
         if (file.isDirectory)
-            walkInFolder(file.path)
+            walkInFolder(path)
     }
 }
 
@@ -96,6 +109,7 @@ fun extractFeatures(file: String) {
     println("=====")
 
     println(file)
+    println(Id.id())
     println()
 
     println(featureNumTabs)
