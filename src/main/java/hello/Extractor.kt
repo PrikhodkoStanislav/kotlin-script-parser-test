@@ -15,30 +15,40 @@ object Id {
     var value = 0
 }
 
+object FileToWrite {
+    fun file(): File = File(dest)
+    val dest = "features.txt"
+}
+
 fun startExtract() {
 
     val folder = "files"
+
+//    val dest = "features.txt"
+//
+//    val file = File(dest)
+
+    FileToWrite.file().writeText("")
 
     walkInFolder(folder)
 }
 
 fun walkInFolder(folder: String) {
 
-    for ( file in File(folder).listFiles()) {
-        val path = file.path
-        if (file.isFile && path.endsWith(".kt")) {
+    File(folder).listFiles().forEach {
+        val path = it.path
+        if (it.isFile && path.endsWith(".kt"))
             extractFeatures(path)
-        }
-        if (file.isDirectory)
+        if (it.isDirectory)
             walkInFolder(path)
     }
 }
 
-fun extractFeatures(file: String) {
+fun extractFeatures(path: String) {
 
-//    val file = "test.kt"
+//    val path = "test.kt"
 
-    val bufferedReader: BufferedReader = File(file).bufferedReader()
+    val bufferedReader: BufferedReader = File(path).bufferedReader()
 
     val lineList = mutableListOf<String>()
 
@@ -104,19 +114,31 @@ fun extractFeatures(file: String) {
     val featureNumSpaces = if (numSpaces == 0) 0.0 else Math.log(numSpaces.toDouble() / length)
     val featureNumEmptyLines = if (numEmptyLines == 0) 0.0 else Math.log(numEmptyLines.toDouble() / length)
     val featureWhiteSpaceRatio = whiteSpaceRatio.toDouble() / (length - whiteSpaceRatio)
-    val featureNumTabsLeadLines = if (numTabsLeadLines * 2 >= numNewLines) 1 else 0
+    val featureNumTabsLeadLines = if (numTabsLeadLines * 2 >= numNewLines) 1.0 else 0.0
 
-    println("=====")
+    val listFeatures = listOf(featureNumTabs, featureNumSpaces, featureNumEmptyLines, featureWhiteSpaceRatio,
+            featureNumTabsLeadLines)
 
-    println(file)
-    println(Id.id())
-    println()
+    FileToWrite.file().appendText(Id.id().toString())
 
-    println(featureNumTabs)
-    println(featureNumSpaces)
-    println(featureNumEmptyLines)
-    println(featureWhiteSpaceRatio)
-    println(featureNumTabsLeadLines)
+    listFeatures.forEach {
+        FileToWrite.file().appendText("\t")
+        FileToWrite.file().appendText(it.toString())
+    }
 
-    println("=====")
+    FileToWrite.file().appendText("\n")
+
+//    println("=====")
+//
+//    println(path)
+//    println(Id.id())
+//    println()
+//
+//    println(featureNumTabs)
+//    println(featureNumSpaces)
+//    println(featureNumEmptyLines)
+//    println(featureWhiteSpaceRatio)
+//    println(featureNumTabsLeadLines)
+//
+//    println("=====")
 }
