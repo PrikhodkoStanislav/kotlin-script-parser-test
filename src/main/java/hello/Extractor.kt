@@ -64,6 +64,7 @@ fun extractFeatures(path: String) {
     var numEmptyLines = 0
     var numTabsLeadLines = 0
     var lengthWithoutNewLine = 0
+    var avgLineLength = 0
 
 //    for (i in inputString) {
 //        when(i) {
@@ -95,10 +96,16 @@ fun extractFeatures(path: String) {
             numEmptyLines++
     }
 
+    // May be -1
     val numNewLines = lineList.size - 1
 
-    // length with new-line symbol
+    // length with new-line symbol, may be -1
     val length = lengthWithoutNewLine + numNewLines
+
+//    println(path)
+//    println(length)
+//    println(lengthWithoutNewLine)
+//    println(numNewLines)
 
     val whiteSpaceRatio = numSpaces + numTabs + numNewLines
 
@@ -110,16 +117,20 @@ fun extractFeatures(path: String) {
 //    println(whiteSpaceRatio)
 //    println(length + numNewLines - whiteSpaceRatio)
 
-    val featureNumTabs = if (numTabs == 0) 0.0 else Math.log(numTabs.toDouble() / length)
-    val featureNumSpaces = if (numSpaces == 0) 0.0 else Math.log(numSpaces.toDouble() / length)
-    val featureNumEmptyLines = if (numEmptyLines == 0) 0.0 else Math.log(numEmptyLines.toDouble() / length)
-    val featureWhiteSpaceRatio = whiteSpaceRatio.toDouble() / (length - whiteSpaceRatio)
+    val featureNumTabs = if (numTabs == 0 || length <= 0) 0.0 else Math.log(numTabs.toDouble() / length)
+    val featureNumSpaces = if (numSpaces == 0 || length <= 0) 0.0 else Math.log(numSpaces.toDouble() / length)
+    val featureNumEmptyLines = if (numEmptyLines == 0 || length <= 0) 0.0 else Math.log(numEmptyLines.toDouble() / length)
+    val featureWhiteSpaceRatio = if (length <= whiteSpaceRatio) 0.0 else (whiteSpaceRatio.toDouble() / (length - whiteSpaceRatio))
     val featureNumTabsLeadLines = if (numTabsLeadLines * 2 >= numNewLines) 1.0 else 0.0
+    val featureAvgLineLength = if (numNewLines <= 0) 0.0 else (length.toDouble() / numNewLines)
 
-    val listFeatures = listOf(featureNumTabs, featureNumSpaces, featureNumEmptyLines, featureWhiteSpaceRatio,
-            featureNumTabsLeadLines)
+    val listFeatures = mutableListOf(featureNumTabs, featureNumSpaces, featureNumEmptyLines, featureWhiteSpaceRatio,
+            featureNumTabsLeadLines, featureAvgLineLength)
 
     FileToWrite.file().appendText(Id.id().toString())
+
+    // Add features from PSI
+    listFeatures.addAll(FeatureExtractorPSI().featuresFromPSI(path))
 
     listFeatures.forEach {
         FileToWrite.file().appendText("\t")

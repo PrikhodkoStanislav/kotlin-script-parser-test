@@ -133,14 +133,15 @@ class KotlinScriptParser {
 
 
 fun main(args: Array<String>) {
-    val scriptFile = if (args.isEmpty()) "src/main/java/hello/CompileTest.kt" else args[0]
+//    val scriptFile = if (args.isEmpty()) "src/main/java/hello/CompileTest.kt" else args[0]
+    val scriptFile = if (args.isEmpty()) "test.kt" else args[0]
 
     val parser = KotlinScriptParser()
 
     val analyzeContext = parser.parse(scriptFile)
     analyzeContext.files.forEach{
         var offset = 0
-        it.acceptChildren(object : PsiRecursiveElementWalkingVisitor(){
+        it.acceptChildren(object : PsiRecursiveElementWalkingVisitor() {
             override fun visitElement(element: PsiElement?) {
                 offset += 2
                 for(t in 0..offset) print(" ")
@@ -152,5 +153,38 @@ fun main(args: Array<String>) {
             }
 
         })
+    }
+}
+
+class FeatureExtractorPSI {
+    fun featuresFromPSI(scriptFile: String): List<Double> {
+        val parser = KotlinScriptParser()
+
+        val analyzeContext = parser.parse(scriptFile)
+
+        var featureMaxDepthPSI = 0
+        analyzeContext.files.forEach{
+//            var offset = 0
+            var depth = 0
+            var maxDepthElement = 0
+            it.acceptChildren(object : PsiRecursiveElementWalkingVisitor() {
+                override fun visitElement(element: PsiElement?) {
+//                    offset += 2
+                    depth++
+//                    for(t in 0..offset) print(" ")
+//                    println("$element {")
+                    element?.acceptChildren(this)
+//                    for(t in 0..offset) print(" ")
+//                    println("}")
+                    if (depth > maxDepthElement)
+                        maxDepthElement = depth
+                    depth--
+//                    offset -= 2
+                }
+
+            })
+            featureMaxDepthPSI = maxOf(featureMaxDepthPSI, maxDepthElement)
+        }
+        return listOf(featureMaxDepthPSI.toDouble())
     }
 }
