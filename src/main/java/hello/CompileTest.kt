@@ -163,17 +163,30 @@ class FeatureExtractorPSI {
         val analyzeContext = parser.parse(scriptFile)
 
         var featureMaxDepthPSI = 0
+
+        var featureNumberOfNodes = 0
+
+        var featureMaxNumberOfChildren = 0
         analyzeContext.files.forEach{
 //            var offset = 0
             var depth = 0
             var maxDepthElement = 0
+
+            var maxNumberOfChildren = it.children.size
             it.acceptChildren(object : PsiRecursiveElementWalkingVisitor() {
                 override fun visitElement(element: PsiElement?) {
+                    featureNumberOfNodes++
 //                    offset += 2
                     depth++
 //                    for(t in 0..offset) print(" ")
 //                    println("$element {")
+
+                    val numberOfChildren = element?.children?.size ?: 0
+
                     element?.acceptChildren(this)
+
+                    maxNumberOfChildren = maxOf(maxNumberOfChildren, numberOfChildren)
+
 //                    for(t in 0..offset) print(" ")
 //                    println("}")
                     if (depth > maxDepthElement)
@@ -184,7 +197,8 @@ class FeatureExtractorPSI {
 
             })
             featureMaxDepthPSI = maxOf(featureMaxDepthPSI, maxDepthElement)
+            featureMaxNumberOfChildren = maxOf(featureMaxNumberOfChildren, maxNumberOfChildren)
         }
-        return listOf(featureMaxDepthPSI.toDouble())
+        return listOf(featureMaxDepthPSI.toDouble(), featureNumberOfNodes.toDouble(), featureMaxNumberOfChildren.toDouble())
     }
 }
