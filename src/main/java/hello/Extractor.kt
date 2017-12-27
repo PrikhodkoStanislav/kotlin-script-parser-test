@@ -17,8 +17,7 @@ object FileToWrite {
 }
 
 object SnipToFile {
-    fun file(name: String, id: String): File = File(destFolder + "\\" + name + "_" + id + ".kt")
-    val destFolder = "snippets"
+    fun file(destFolder: String, name: String, id: String): File = File(destFolder + "\\" + name + "_" + id + ".kt")
 }
 
 fun main(args: Array<String>) {
@@ -75,8 +74,8 @@ fun extractSnippets(path: String, snipFolder: String) {
                 fileName = path.substring(startName, finishName)
             else
                 fileName = path
-            SnipToFile.file(fileName, snipId.toString()).writeText(line)
-            SnipToFile.file(fileName, snipId.toString()).appendText("\n")
+            SnipToFile.file(snipFolder, fileName, snipId.toString()).writeText(line)
+            SnipToFile.file(snipFolder, fileName, snipId.toString()).appendText("\n")
 
             line.forEach {
                 when (it) {
@@ -93,8 +92,8 @@ fun extractSnippets(path: String, snipFolder: String) {
                         '}' -> numBrackets--
                     }
                 }
-                SnipToFile.file(fileName, snipId.toString()).appendText(theLine)
-                SnipToFile.file(fileName, snipId.toString()).appendText("\n")
+                SnipToFile.file(snipFolder, fileName, snipId.toString()).appendText(theLine)
+                SnipToFile.file(snipFolder, fileName, snipId.toString()).appendText("\n")
             }
             snipId++
         }
