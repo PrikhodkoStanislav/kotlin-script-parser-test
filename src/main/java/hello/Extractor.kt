@@ -17,7 +17,21 @@ object FileToWrite {
 }
 
 object SnipToFile {
-    fun file(destFolder: String, name: String, id: String): File = File(destFolder + "\\" + name + "_" + id + ".kt")
+    fun file(snippetName: String): File = File(snippetName)
+}
+
+object FileNumber {
+    var count: Int = 0
+        set(value: Int) {
+            field = value
+        }
+}
+
+object SnippetNumber {
+    var count: Int = 0
+        set(value: Int) {
+            field = value
+        }
 }
 
 fun main(args: Array<String>) {
@@ -30,13 +44,17 @@ fun startExtract() {
 //
 //    val file = File(dest)
 
-    FileToWrite.file().writeText("")
-
     val folder = "files"
     val snipFolder = "snippets"
     createSnippets(folder, snipFolder)
+    print("Number of files = " + FileNumber.count.toString())
+    print("\n")
 
+
+    FileToWrite.file().writeText("")
     walkInFolder(snipFolder)
+    print("Number of snippets = " + SnippetNumber.count.toString())
+    print("\n")
 }
 
 fun createSnippets(folder: String, snipFolder: String) {
@@ -59,6 +77,9 @@ fun extractSnippets(path: String, snipFolder: String) {
 
     val size = lineList.size
 
+    val fileNumber = FileNumber.count + 1
+    FileNumber.count = fileNumber
+
     var snipId = 1
 
     var numBrackets = 0
@@ -74,8 +95,10 @@ fun extractSnippets(path: String, snipFolder: String) {
                 fileName = path.substring(startName, finishName)
             else
                 fileName = path
-            SnipToFile.file(snipFolder, fileName, snipId.toString()).writeText(line)
-            SnipToFile.file(snipFolder, fileName, snipId.toString()).appendText("\n")
+
+            val snippetName = snipFolder + "\\" + fileName + "_" + fileNumber.toString() + "_" + snipId.toString() + ".kt"
+            SnipToFile.file(snippetName).writeText(line)
+            SnipToFile.file(snippetName).appendText("\n")
 
             line.forEach {
                 when (it) {
@@ -92,8 +115,8 @@ fun extractSnippets(path: String, snipFolder: String) {
                         '}' -> numBrackets--
                     }
                 }
-                SnipToFile.file(snipFolder, fileName, snipId.toString()).appendText(theLine)
-                SnipToFile.file(snipFolder, fileName, snipId.toString()).appendText("\n")
+                SnipToFile.file(snippetName).appendText(theLine)
+                SnipToFile.file(snippetName).appendText("\n")
             }
             snipId++
         }
@@ -125,6 +148,9 @@ fun extractFeatures(path: String) {
 //    println(inputString)
 
 //    val length = inputString.length
+
+    val snippetNumber = SnippetNumber.count + 1
+    SnippetNumber.count = snippetNumber
 
     var numSpaces = 0
     var numTabs = 0
