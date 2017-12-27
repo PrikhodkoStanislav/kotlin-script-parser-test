@@ -3,10 +3,6 @@ package hello
 import java.io.BufferedReader
 import java.io.File
 
-fun main(args: Array<String>) {
-    startExtract()
-}
-
 object Id {
     fun id(): Int {
         value++
@@ -20,9 +16,16 @@ object FileToWrite {
     val dest = "features.txt"
 }
 
-fun startExtract() {
+object SnipToFile {
+    fun file(name: String, id: String): File = File(destFolder + "\\" + name + "_" + id + ".kt")
+    val destFolder = "snippets"
+}
 
-    val folder = "files"
+fun main(args: Array<String>) {
+    startExtract()
+}
+
+fun startExtract() {
 
 //    val dest = "features.txt"
 //
@@ -30,11 +33,76 @@ fun startExtract() {
 
     FileToWrite.file().writeText("")
 
-    walkInFolder(folder)
+    val folder = "files"
+    val snipFolder = "snippets"
+    createSnippets(folder, snipFolder)
+
+    walkInFolder(snipFolder)
+}
+
+fun createSnippets(folder: String, snipFolder: String) {
+    File(folder).listFiles().forEach {
+        val path = it.path
+        path.replace(' ', '_')
+        if (it.isFile && path.endsWith(".kt"))
+            extractSnippets(path, snipFolder)
+        if (it.isDirectory)
+            createSnippets(path, snipFolder)
+    }
+}
+
+fun extractSnippets(path: String, snipFolder: String) {
+    val bufferedReader: BufferedReader = File(path).bufferedReader()
+
+    val lineList = mutableListOf<String>()
+
+    bufferedReader.useLines { lines -> lines.forEach { lineList.add(it) } }
+
+    val size = lineList.size
+
+    var snipId = 1
+
+    var numBrackets = 0
+
+    var i = 0
+    while (i < size) {
+        val line = lineList[i]
+        if (line.contains("fun")) {
+            var fileName = ""
+            val startName = path.lastIndexOf('\\') + 1
+            val finishName = path.lastIndexOf('.')
+            if (startName != 0 && finishName != -1)
+                fileName = path.substring(startName, finishName)
+            else
+                fileName = path
+            SnipToFile.file(fileName, snipId.toString()).writeText(line)
+            SnipToFile.file(fileName, snipId.toString()).appendText("\n")
+
+            line.forEach {
+                when (it) {
+                    '{' -> numBrackets++
+                    '}' -> numBrackets--
+                }
+            }
+            while (numBrackets != 0 && i < size - 1) {
+                i++
+                val theLine = lineList[i]
+                theLine.forEach {
+                    when (it) {
+                        '{' -> numBrackets++
+                        '}' -> numBrackets--
+                    }
+                }
+                SnipToFile.file(fileName, snipId.toString()).appendText(theLine)
+                SnipToFile.file(fileName, snipId.toString()).appendText("\n")
+            }
+            snipId++
+        }
+        i++
+    }
 }
 
 fun walkInFolder(folder: String) {
-
     File(folder).listFiles().forEach {
         val path = it.path
         if (it.isFile && path.endsWith(".kt"))
@@ -64,7 +132,6 @@ fun extractFeatures(path: String) {
     var numEmptyLines = 0
     var numTabsLeadLines = 0
     var lengthWithoutNewLine = 0
-    var avgLineLength = 0
 
 //    for (i in inputString) {
 //        when(i) {
