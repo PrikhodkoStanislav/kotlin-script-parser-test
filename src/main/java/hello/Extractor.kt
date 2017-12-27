@@ -34,6 +34,13 @@ object SnippetNumber {
         }
 }
 
+object LineNumber {
+    var count: Int = 0
+        set(value: Int) {
+            field = value
+        }
+}
+
 fun main(args: Array<String>) {
     startExtract()
 }
@@ -48,6 +55,9 @@ fun startExtract() {
     val snipFolder = "snippets"
     createSnippets(folder, snipFolder)
     print("Number of files = " + FileNumber.count.toString())
+    print("\n")
+
+    print("Number of lines = " + LineNumber.count.toString())
     print("\n")
 
 
@@ -76,6 +86,8 @@ fun extractSnippets(path: String, snipFolder: String) {
     bufferedReader.useLines { lines -> lines.forEach { lineList.add(it) } }
 
     val size = lineList.size
+
+    LineNumber.count += size
 
     val fileNumber = FileNumber.count + 1
     FileNumber.count = fileNumber
