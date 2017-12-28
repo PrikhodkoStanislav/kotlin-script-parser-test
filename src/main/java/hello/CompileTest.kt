@@ -167,6 +167,10 @@ class FeatureExtractorPSI {
         var featureNumberOfNodes = 0
 
         var featureMaxNumberOfChildren = 0
+
+        var featureAVGNumberOfChildren = 0.0
+
+        var listOfChildren = mutableListOf<Int>()
         analyzeContext.files.forEach{
 //            var offset = 0
             var depth = 0
@@ -182,6 +186,8 @@ class FeatureExtractorPSI {
 //                    println("$element {")
 
                     val numberOfChildren = element?.children?.size ?: 0
+
+                    listOfChildren.add(numberOfChildren)
 
                     element?.acceptChildren(this)
 
@@ -199,6 +205,9 @@ class FeatureExtractorPSI {
             featureMaxDepthPSI = maxOf(featureMaxDepthPSI, maxDepthElement)
             featureMaxNumberOfChildren = maxOf(featureMaxNumberOfChildren, maxNumberOfChildren)
         }
-        return listOf(featureMaxDepthPSI.toDouble(), featureNumberOfNodes.toDouble(), featureMaxNumberOfChildren.toDouble())
+
+        featureAVGNumberOfChildren = if (listOfChildren.size == 0) 0.0 else (listOfChildren.sum().toDouble() / listOfChildren.size)
+
+        return listOf(featureMaxDepthPSI.toDouble(), featureNumberOfNodes.toDouble(), featureMaxNumberOfChildren.toDouble(), featureAVGNumberOfChildren.toDouble())
     }
 }
