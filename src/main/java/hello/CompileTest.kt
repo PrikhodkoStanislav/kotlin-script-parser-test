@@ -187,7 +187,8 @@ class FeatureExtractorPSI {
 
                     val numberOfChildren = element?.children?.size ?: 0
 
-                    listOfChildren.add(numberOfChildren)
+                    if (numberOfChildren > 0)
+                        listOfChildren.add(numberOfChildren)
 
                     element?.acceptChildren(this)
 
@@ -206,6 +207,13 @@ class FeatureExtractorPSI {
             featureMaxNumberOfChildren = maxOf(featureMaxNumberOfChildren, maxNumberOfChildren)
         }
 
+//        listOfChildren.forEach {
+//            print(it)
+//            print("\n")
+//        }
+//        print("\n")
+//        print(listOfChildren.sum().toDouble())
+        
         featureAVGNumberOfChildren = if (listOfChildren.size == 0) 0.0 else (listOfChildren.sum().toDouble() / listOfChildren.size)
 
         return listOf(featureMaxDepthPSI.toDouble(), featureNumberOfNodes.toDouble(), featureMaxNumberOfChildren.toDouble(), featureAVGNumberOfChildren.toDouble())
