@@ -16,9 +16,16 @@ fun main(args: Array<String>) {
                 val result = ASTBuilder().buildAST(path)
 
                 val startName = path.lastIndexOf('s') + 1
-                val fileName = snipFolder.path + "\\" + "PSI" + "\\" + "PSI" + path.substring(startName)
 
-                File(fileName).appendText(result)
+                //val fileName = snipFolder.path + "\\" + "PSI" + "\\" + "PSI" + path.substring(startName)
+                //File(fileName).appendText(result)
+
+                val newDirectory = File(snipFolder.path + "\\" + "PSI" + "\\")
+                newDirectory.mkdirs()
+
+                val fileName = "PSI" + path.substring(startName)
+
+                File(newDirectory, fileName).appendText(result)
             }
         }
     }
