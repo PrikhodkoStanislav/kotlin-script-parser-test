@@ -156,6 +156,36 @@ fun main(args: Array<String>) {
     }
 }
 
+class ASTBuilder {
+    fun buildAST(file: String): String {
+        var result = ""
+
+        val parser = KotlinScriptParser()
+
+        val analyzeContext = parser.parse(file)
+        analyzeContext.files.forEach{
+            var offset = 0
+            it.acceptChildren(object : PsiRecursiveElementWalkingVisitor() {
+                override fun visitElement(element: PsiElement?) {
+                    offset += 2
+                    for(t in 0..offset)
+                        result += " "
+                    result += "$element {"
+                    result += "\n"
+                    element?.acceptChildren(this)
+                    for(t in 0..offset)
+                        result += " "
+                    result += "}"
+                    result += "\n"
+                    offset -= 2
+                }
+
+            })
+        }
+        return result
+    }
+}
+
 class FeatureExtractorPSI {
     fun featuresFromPSI(scriptFile: String): List<Double> {
         val parser = KotlinScriptParser()
